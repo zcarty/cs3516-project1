@@ -1,7 +1,7 @@
 all: QRServer
 
-QRServer: server.c
-	gcc -Wall server.c -o QRServer
+server: server.cpp
+	g++ -Wall server.cpp -o QRServer
 
 clean:
 	rm QRServer
