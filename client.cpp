@@ -56,20 +56,6 @@ int main()
     }
     puts("done");
 
-    /* Ask user for string, and create buffer */
-    char *input;
-    cin >> input;
-    int input_len = strlen(input);
-
-    char echoBuffer[32];
-    int bytesRcvd;
-
-    /* at this point you can interact with the TCP server */
-    if (send(sockfd, input, input_len, 0))
-    {
-        perror("Failed to send");
-    }
-
 	char buff[MAX];
     int n;
     for (;;) {
@@ -86,20 +72,6 @@ int main()
             break;
         }
     }
-
-    int totalBytesRcvd = 0;
-    printf("Recived:");
-    while (totalBytesRcvd < input_len)
-    {
-        /* Receive up to the buffer size (minus 1 to leave space for
-                                     a null terminator) bytes from the sender */
-        if ((bytesRcvd = recv(sockfd, echoBuffer, 32 - 1, 0)) <= 0)
-            perror("recv() failed or connection closed prematurely");
-        totalBytesRcvd += bytesRcvd;  /* Keep tally of total bytes */
-        echoBuffer[bytesRcvd] = '\0'; /* Terminate the string! */
-        printf("%s", echoBuffer);     /* Print the echo buffer */
-    }
-    printf("\n");
 
     /* free allocated memory */
     freeaddrinfo(server);
