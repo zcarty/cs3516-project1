@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <fstream>
 using namespace std;
 
 #define MAX 64
@@ -29,7 +30,7 @@ int main()
         exit(1);
     }
     puts("done");
-	printf("%s", server->ai_addr);
+    //printf("%s", server->ai_addr);
 
     /* create the socket */
     printf("Assign a socket...");
@@ -57,22 +58,23 @@ int main()
     }
     puts("done");
 
-	char buff[MAX];
-    int n;
-    for (;;) {
-        bzero(buff, sizeof(buff));
-        printf("Enter the string : ");
-        n = 0;
-        while ((buff[n++] = getchar()) != '\n');
-        write(sockfd, buff, sizeof(buff));
-        bzero(buff, sizeof(buff));
-        read(sockfd, buff, sizeof(buff));
-        printf("From Server : %s", buff);
-        if ((strncmp(buff, "exit", 4)) == 0) {
-            printf("Client Exit...\n");
-            break;
-        }
-    }
+    
+    printf("Enter the file path: ");
+    string filename;
+    cin >> filename;
+
+    ifstream fin(filename, ios::in | ios::binary);
+    int buff_size = fin.tellg();
+    
+    char buff[buff_size];
+    bzero(buff, sizeof(buff));
+    fin.read(buff, sizeof(buff));
+    fin.close();
+
+    write(sockfd, buff, sizeof(buff));
+    bzero(buff, buff_size);
+    read(sockfd, buff, sizeof(buff));
+    printf("From Server : %s", buff);
 
     /* free allocated memory */
     freeaddrinfo(server);

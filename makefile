@@ -6,7 +6,6 @@ server: server.cpp
 
 client: client.cpp
 	g++ -Wall client.cpp -o QRClient
-	./QRClient
 
 clean:
 	rm -f QRServer

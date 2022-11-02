@@ -2,3 +2,7 @@
 a.out
 QRServer
 QRClient
+server
+client
+client.dSYM
+server.dSYM

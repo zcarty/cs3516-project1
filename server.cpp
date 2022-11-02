@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 		server->ai_socktype, /* type, stream */
 		server->ai_protocol	 /* protocol, IP */
 	);
-	//if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, ))
+	// if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, ))
 	if (sockfd == -1)
 	{
 		cout << "failed" << endl;
@@ -123,23 +123,17 @@ int main(int argc, char **argv)
 	char buff[MAX];
 	int n;
 
-	for(;;) {
-		bzero(buff, MAX);
-		read(clientfd, buff, sizeof(buff));
+	bzero(buff, MAX);
+	read(clientfd, buff, sizeof(buff));
 
-		printf("From client: %s\t To client : ", buff);
-        bzero(buff, MAX);
-        n = 0;
+	// Image is in buffer now
 
-        // copy server message in the buffer
-        while ((buff[n++] = getchar()) != '\n');
-		write(clientfd, buff, sizeof(buff));
+	// printf("From client: %s\t To client : ", buff);
+	bzero(buff, MAX);
 
-		if (strncmp("exit", buff, 4) == 0) {
-            printf("Server Exit...\n");
-            break;
-        }
-	}
+	// copy server message in the buffer
+	buff[0] = 'h';
+	write(clientfd, buff, sizeof(buff));
 
 	/* close the client socket */
 	close(clientfd);
