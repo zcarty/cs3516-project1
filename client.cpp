@@ -29,6 +29,7 @@ int main()
         exit(1);
     }
     puts("done");
+	printf("%s", server->ai_addr);
 
     /* create the socket */
     printf("Assign a socket...");
