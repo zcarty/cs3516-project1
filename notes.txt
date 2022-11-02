@@ -1,0 +1,11 @@
+reading a binary file
+	fopen(,"rb") and "wb"
+determine how big the transmitted file is
+	fseek, ftell, rewind (go to end of file, then find amount moved, reset to beginning)
+read each byte into buffer
+	char buffer []
+	u_int32_t length
+	u_int32_t bytesReceived = 0
+	while (bytesReceived < length)
+		bytesActuallyReceived = recv(sock, buffer + bytesReceived, length - bytesReceived)
+		bytesReceived += bytesActuallyReceived
