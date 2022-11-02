@@ -1,0 +1,5 @@
+CS3516 Using VM:
+
+ssh -p <PORT NUM> student@secnet-gateway.cs.wpi.edu
+
+tWbjLz4JTRC9Xx

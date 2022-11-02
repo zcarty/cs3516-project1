@@ -9,4 +9,7 @@ client: client.cpp
 	./QRClient
 
 clean:
-	rm QRServer
+	rm -f QRServer
+	rm -f QRClient
+	rm -f a.out
+	rm -f server
