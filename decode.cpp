@@ -1,14 +1,10 @@
-#include <stdint.h>
+#include "include.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-int main() {
-    int width, height, bpp;
-
-    uint8_t* rgb_image = stbi_load("image.png", &width, &height, &bpp, 3);
-
-    stbi_image_free(rgb_image);
-
-    return 0;
+/* From file location of a QR Code, produces url*/
+string getURL(string fileLoc)
+{
+    string start = "java -cp javase.jar:core.jar com.google.zxing.client.j2se.CommandLineRunner " + fileLoc;
+    const char * command = start.c_str();
+    
+    system(command);
 }
