@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#define MAX 64
 using namespace std;
 
 // ./QRServer [option1, ... , optionN]
@@ -117,6 +118,28 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	cout << "on file descriptor " << clientfd << endl;
+
+	/* client-server interaction */
+	char buff[MAX];
+	int n;
+
+	for(;;) {
+		bzero(buff, MAX);
+		read(clientfd, buff, sizeof(buff));
+
+		printf("From client: %s\t To client : ", buff);
+        bzero(buff, MAX);
+        n = 0;
+
+        // copy server message in the buffer
+        while ((buff[n++] = getchar()) != '\n');
+		write(clientfd, buff, sizeof(buff));
+
+		if (strncmp("exit", buff, 4) == 0) {
+            printf("Server Exit...\n");
+            break;
+        }
+	}
 
 	/* close the client socket */
 	close(clientfd);
