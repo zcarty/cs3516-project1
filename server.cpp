@@ -6,6 +6,7 @@
  */
 
 #include "include.h"
+#include "decode.cpp"
 
 // ./QRServer [option1, ... , optionN]
 //  PORT [port number] (default: 2012)
@@ -123,6 +124,8 @@ int main(int argc, char **argv)
 	ofstream picture("picture.png");
 	picture.write(buff, sizeof(buff));
 	picture.close();
+	
+	getURL("picture.png");
 
 	// printf("From client: %s\t To client : ", buff);
 	bzero(buff, sizeof(buff));
