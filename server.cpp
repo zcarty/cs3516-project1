@@ -5,14 +5,7 @@
  * Creates single-threaded server
  */
 
-#include <iostream>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#define MAX 64
-using namespace std;
+#include "include.h"
 
 // ./QRServer [option1, ... , optionN]
 //  PORT [port number] (default: 2012)
@@ -120,16 +113,19 @@ int main(int argc, char **argv)
 	cout << "on file descriptor " << clientfd << endl;
 
 	/* client-server interaction */
-	char buff[MAX];
+	char buff[10000];
 	int n;
 
-	bzero(buff, MAX);
+	bzero(buff, sizeof(buff));
 	read(clientfd, buff, sizeof(buff));
 
 	// Image is in buffer now
+	ofstream picture("picture.png");
+	picture.write(buff, sizeof(buff));
+	picture.close();
 
 	// printf("From client: %s\t To client : ", buff);
-	bzero(buff, MAX);
+	bzero(buff, sizeof(buff));
 
 	// copy server message in the buffer
 	buff[0] = 'h';

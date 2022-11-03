@@ -13,9 +13,9 @@ int main()
 
     /* CONFIGURE */
     printf("Configuring host...");
-    memset(&hints, 0, sizeof(struct addrinfo)); 
-    hints.ai_family = AF_INET;                  /* IPv4 connection */
-    hints.ai_socktype = SOCK_STREAM;            /* TCP, streaming */
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;       /* IPv4 connection */
+    hints.ai_socktype = SOCK_STREAM; /* TCP, streaming */
     /* connection with localhost (zero) on port 2012 (CHANGE IP AND PORT NUM LATER) */
     r = getaddrinfo(0, "2012", &hints, &server);
     if (r != 0)
@@ -58,13 +58,19 @@ int main()
 
     /* OPEN FILE */
     ifstream fin(filename, ios::in | ios::binary);
-    int buff_size = fin.tellg();    // Get file size, which will be max buffer size
-    
-    char buff[buff_size];           
+    int begin = fin.tellg();
+    fin.seekg(0, ios::end);
+    int end = fin.tellg();
+    int buff_size = end - begin; // Get file size, which will be max buffer size
+    printf("%d", buff_size);
+
+    char buff[buff_size];
     bzero(buff, sizeof(buff));
-    fin.read(buff, sizeof(buff));   // Put file contents into buffer
+    fin.seekg(0);
+    fin.read(buff, sizeof(buff)); // Put file contents into buffer
     fin.close();
 
+    cout << "one" << buff [0] << ".";
     /* WRITE DATA TO SERVER */
     write(sockfd, buff, sizeof(buff));
     bzero(buff, buff_size);
