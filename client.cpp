@@ -1,28 +1,22 @@
-/* connect with a TCP server */
-/* this is the TCP client code */
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <fstream>
-using namespace std;
-
-#define MAX 64
+/*
+ * client.cpp
+ * Zeb Carty & Michael McInerney
+ *
+ * Creates client to interact with server
+ */
+#include "include.h"
 
 int main()
 {
     struct addrinfo hints, *server;
     int r, sockfd;
 
-    /* configure the host */
+    /* CONFIGURE */
     printf("Configuring host...");
-    memset(&hints, 0, sizeof(struct addrinfo)); /* use memset_s() */
+    memset(&hints, 0, sizeof(struct addrinfo)); 
     hints.ai_family = AF_INET;                  /* IPv4 connection */
     hints.ai_socktype = SOCK_STREAM;            /* TCP, streaming */
-    /* connection with localhost (zero) on port 8080 */
+    /* connection with localhost (zero) on port 2012 (CHANGE IP AND PORT NUM LATER) */
     r = getaddrinfo(0, "2012", &hints, &server);
     if (r != 0)
     {
@@ -30,9 +24,8 @@ int main()
         exit(1);
     }
     puts("done");
-    //printf("%s", server->ai_addr);
 
-    /* create the socket */
+    /* CREATE SOCKET */
     printf("Assign a socket...");
     sockfd = socket(
         server->ai_family,   /* domain, TCP here */
@@ -46,7 +39,7 @@ int main()
     }
     puts("done");
 
-    /* bind - name the socket */
+    /* BIND SOCKET */
     printf("Connecting socket...");
     r = connect(sockfd,
                 server->ai_addr,
@@ -58,28 +51,31 @@ int main()
     }
     puts("done");
 
-    
+    /* PROMPT USER FOR FILE PATH */
     printf("Enter the file path: ");
     string filename;
     cin >> filename;
 
+    /* OPEN FILE */
     ifstream fin(filename, ios::in | ios::binary);
-    int buff_size = fin.tellg();
+    int buff_size = fin.tellg();    // Get file size, which will be max buffer size
     
-    char buff[buff_size];
+    char buff[buff_size];           
     bzero(buff, sizeof(buff));
-    fin.read(buff, sizeof(buff));
+    fin.read(buff, sizeof(buff));   // Put file contents into buffer
     fin.close();
 
+    /* WRITE DATA TO SERVER */
     write(sockfd, buff, sizeof(buff));
     bzero(buff, buff_size);
-    read(sockfd, buff, sizeof(buff));
+    read(sockfd, buff, sizeof(buff)); // Read data back from server
     printf("From Server : %s", buff);
 
-    /* free allocated memory */
+    /* FREE MEMORY */
     freeaddrinfo(server);
-    /* close the socket */
+
+    /* CLOSE SOCKET */
     close(sockfd);
     puts("Socket closed, done");
-    return (0);
+    return 0;
 }
