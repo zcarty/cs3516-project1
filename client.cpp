@@ -70,7 +70,6 @@ int main()
     fin.read(buff, sizeof(buff)); // Put file contents into buffer
     fin.close();
 
-    cout << "one" << buff [0] << ".";
     /* WRITE DATA TO SERVER */
     write(sockfd, buff, sizeof(buff));
     bzero(buff, buff_size);
