@@ -1,11 +1,6 @@
 all: QRServer
 
-
-#server: server.cpp
-#	g++ -Wall server.cpp -o QRServer
-#	./QRServer
-
-server: server.cpp
+server: quickserver.cpp
 	g++ -Wall -pthread server.cpp -o QRServer
 	./QRServer
 

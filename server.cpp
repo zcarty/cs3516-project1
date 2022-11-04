@@ -59,6 +59,7 @@ void* concurrency(void* inp) {
 
 int main(int argc, char **argv)
 {
+	char *ip_address = "10.63.4.1";
 	char *port_num = "2012";
 	int num_reqs = 3;
 	int req_secs = 60;
@@ -77,7 +78,14 @@ int main(int argc, char **argv)
 	{
 		if (strcmp(argv[i], "PORT") == 0)
 		{
-			port_num = argv[i + 1];
+			if(2000 > atoi(argv[i]) || atoi(argv[i]) > 3000)
+			{
+				printf("Please designate a port between 2000 - 3000. Default port (2012) used.");
+			}
+			else
+			{
+				port_num = argv[i + 1];
+			}
 		}
 		else if (strcmp(argv[i], "RATE") == 0)
 		{
@@ -111,7 +119,7 @@ int main(int argc, char **argv)
 	hints.ai_family = AF_INET;					/* IPv4 connection */
 	hints.ai_socktype = SOCK_STREAM;			/* TCP, streaming */
 	/* connection with localhost (zero) on port number */
-	r = getaddrinfo(0, port_num, &hints, &server);
+	r = getaddrinfo(ip_address, port_num, &hints, &server);
 	if (r != 0)
 	{
 		cout << "failed" << endl;

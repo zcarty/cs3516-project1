@@ -6,10 +6,27 @@
  */
 #include "include.h"
 
-int main()
+int main(int argc, char **argv)
 {
+    char *ip_address = "10.63.4.1";
+    char *port_num = "2012";
     struct addrinfo hints, *server;
     int r, sockfd;
+
+    for (int i = 0; i < argc; i++)
+	{
+		if (strcmp(argv[i], "PORT") == 0)
+		{
+			if(2000 > atoi(argv[i]) || atoi(argv[i]) > 3000)
+			{
+				printf("Please designate a port between 2000 - 3000. Default port (2012) used.");
+			}
+			else
+			{
+				port_num = argv[i + 1];
+			}
+		}
+    }
 
     /* CONFIGURE */
     printf("Configuring host...");
@@ -17,7 +34,7 @@ int main()
     hints.ai_family = AF_INET;       /* IPv4 connection */
     hints.ai_socktype = SOCK_STREAM; /* TCP, streaming */
     /* connection with localhost (zero) on port 2012 (CHANGE IP AND PORT NUM LATER) */
-    r = getaddrinfo(0, "2012", &hints, &server);
+    r = getaddrinfo(ip_address, port_num, &hints, &server);
     if (r != 0)
     {
         perror("failed");

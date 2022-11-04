@@ -1,26 +1,24 @@
 #include "include.h"
 
-/* Take command and return terminal output*/
+/* Take command and return terminal output */
 string exec(string command) {
-   char buffer[128];
-   string result = "";
+   char buff[128];
+   string output = "";
 
-   // Open pipe to file
+   // Create a new stream with popen
    FILE* pipe = popen(command.c_str(), "r");
    if (!pipe) {
-      return "popen failed!";
+      return "popen failed.";
    }
 
-   // read till end of process:
+   // Send data to buffer until end is reached
    while (!feof(pipe)) {
-
-      // use buffer to read and add to result
-      if (fgets(buffer, 128, pipe) != NULL)
-         result += buffer;
+      if (fgets(buff, sizeof(buff), pipe) != NULL)
+         output += buff;
    }
 
    pclose(pipe);
-   return result;
+   return output;
 }
 
 
