@@ -2,17 +2,60 @@
  * server.c
  * Zeb Carty & Michael McInerney
  *
- * Creates single-threaded server
+ * Creates multithreaded server
  */
 
 #include "include.h"
 #include "decode.cpp"
+
 
 // ./QRServer [option1, ... , optionN]
 //  PORT [port number] (default: 2012)
 //  RATE [number requests] [number seconds] (default: 3 requests/60 seconds)
 //  MAX_USERS [number of users] (default: 3 users)
 //  TIME_OUT [number of seconds] (default: 80 seconds)
+
+bool* returned;
+
+struct handler {
+    int file_descriptor;
+    int thread_id;
+};
+
+void* concurrency(void* inp) {
+    handler* input = (handler*) inp;
+    int clientfd = input -> file_descriptor;
+
+	/* client-server interaction */
+	char buff[10000];
+	int bytes_read;
+
+	bzero(buff, sizeof(buff));
+	bytes_read = read(clientfd, buff, sizeof(buff));
+
+	// Image is in buffer now
+    char filename[100];
+    sprintf(filename, "picture%d.png", (input -> thread_id));
+
+	ofstream picture(filename);
+	picture.write(buff, bytes_read);
+	picture.close();
+	
+	string url = getURL(filename);
+
+	// printf("From client: %s\t To client : ", buff);
+	bzero(buff, sizeof(buff));
+    strcpy(buff, url.c_str());
+
+	// copy server message in the buffer
+	write(clientfd, buff, sizeof(buff));
+
+	/* close the client socket */
+	close(clientfd);
+    
+    returned[input -> thread_id] = true;
+	return NULL;
+}
 
 int main(int argc, char **argv)
 {
@@ -22,7 +65,14 @@ int main(int argc, char **argv)
 	int max_users = 3;
 	int timeout_secs = 80;
 
-	/* ASSIGN COMMAND LINE ARGS */ 
+    // concurrency variables
+    handler* handlers;
+    pthread_t* threads;
+    bool* actives;
+    int num_actives = 0;
+    int tracker = 0;
+
+	// Assign command line arguments
 	for (int i = 0; i < argc; i++)
 	{
 		if (strcmp(argv[i], "PORT") == 0)
@@ -49,12 +99,18 @@ int main(int argc, char **argv)
 	struct sockaddr client_address;
 	socklen_t client_len;
 
-	/* CONFIGURE */
+    // allocate memory for threads and status tracking
+    threads = (pthread_t*) malloc(max_users*sizeof(pthread_t));
+    handlers = (handler*) malloc(max_users*sizeof(handler));
+    actives = (bool*) calloc(max_users, sizeof(bool));
+    returned = (bool*) calloc(max_users, sizeof(bool));
+
+	/* configure the host */
 	cout << "Configuring host...";
-	memset(&hints, 0, sizeof(struct addrinfo)); 
+	memset(&hints, 0, sizeof(struct addrinfo)); /* use memset_s() */
 	hints.ai_family = AF_INET;					/* IPv4 connection */
 	hints.ai_socktype = SOCK_STREAM;			/* TCP, streaming */
-    /* connection with localhost (zero) on port 2012 (CHANGE IP AND PORT NUM LATER) */
+	/* connection with localhost (zero) on port number */
 	r = getaddrinfo(0, port_num, &hints, &server);
 	if (r != 0)
 	{
@@ -63,14 +119,14 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-    /* CREATE SOCKET */
+	/* create the socket */
 	cout << "Assign a socket...";
 	sockfd = socket(
 		server->ai_family,	 /* domain, TCP here */
 		server->ai_socktype, /* type, stream */
 		server->ai_protocol	 /* protocol, IP */
 	);
-
+	// if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, ))
 	if (sockfd == -1)
 	{
 		cout << "failed" << endl;
@@ -78,7 +134,7 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-    /* BIND SOCKET */
+	/* bind - name the socket */
 	cout << "Binding socket...";
 	r = bind(sockfd,
 			 server->ai_addr,
@@ -90,7 +146,7 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-	/* LISTEN */
+	/* listen for incoming connections */
 	cout << "Listening...";
 	r = listen(sockfd, num_reqs);
 	if (r == -1)
@@ -100,53 +156,54 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-	/* ACCEPT */
-	cout << "Accepting new connection ";
-	client_len = sizeof(client_address);
-	clientfd = accept(sockfd,
-					  &client_address,
-					  &client_len);
-	if (clientfd == -1)
-	{
-		cout << "failed" << endl;
-		exit(1);
-	}
-	cout << "on file descriptor " << clientfd << endl;
+    for(;;) {
+        /* accept a new connection */
+        cout << "Accepting new connection ";
+        client_len = sizeof(client_address);
+        clientfd = accept(sockfd,
+                        &client_address,
+                        &client_len);
+        if (clientfd == -1)
+        {
+            cout << "failed" << endl;
+            exit(1);
+        }
+        cout << "on file descriptor " << clientfd << endl;
+        for(int i = 0; i < max_users; i++) {
+            if(returned[i] == true) {
+                returned[i] = false;
+                actives[i] = false;
+                pthread_join(threads[i], NULL);
+                num_actives--;
+            }
+        } if(num_actives >= max_users) { // thread cleanup
+            char error[] = "Error: max number of concurrent connections reached";
+            write(clientfd, error, sizeof(error));
+            close(clientfd);
+            continue;
+        }
 
-	/* CLIENT-SERVER INTERACTION*/
-	char buff[10000];
+        // scan through actives to see what may not be used
+        while(actives[tracker] == true) {
+            tracker++;
+            if(tracker >= max_users) {
+                tracker = 0;
+            }
+        }
 
-	bzero(buff, sizeof(buff));
-	read(clientfd, buff, sizeof(buff));
+        // assign new thread to inactive id
+        handlers[tracker].file_descriptor = clientfd;
+        handlers[tracker].thread_id = tracker;
+        actives[tracker] = true; num_actives++;
 
-	// Image is in buffer now
-	ofstream picture("picture.png");
-	picture.write(buff, sizeof(buff));
-	picture.close();
-	
-	string url;
-	
-	url = getURL("picture.png");
-	int url_size = url.length();
-	char url_char[url_size + 1];
-	strcpy(url_char, url.c_str());
+        // create the thread
+        pthread_create(&threads[tracker], NULL, concurrency, &handlers[tracker]);
+        
+    }
 
-	bzero(buff, sizeof(buff));
-
-	for (int i = 0; i < url_size; i++)
-	{
-		buff[i] = url_char[i];
-	}
-	
-	write(clientfd, buff, sizeof(buff));
-
-	/* CLOSE SOCKET */
-	close(clientfd);
-
-    /* FREE MEMORY */
-    freeaddrinfo(server);
-
-    /* CLOSE SOCKET */
+	/* free allocated memory */
+	freeaddrinfo(server);
+	/* close the socket */
 	close(sockfd);
 	cout << "Socket closed, done";
 
