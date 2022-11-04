@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	int max_users = 3;
 	int timeout_secs = 80;
 
-	// Assign command line arguments
+	/* ASSIGN COMMAND LINE ARGS */ 
 	for (int i = 0; i < argc; i++)
 	{
 		if (strcmp(argv[i], "PORT") == 0)
@@ -49,12 +49,12 @@ int main(int argc, char **argv)
 	struct sockaddr client_address;
 	socklen_t client_len;
 
-	/* configure the host */
+	/* CONFIGURE */
 	cout << "Configuring host...";
-	memset(&hints, 0, sizeof(struct addrinfo)); /* use memset_s() */
+	memset(&hints, 0, sizeof(struct addrinfo)); 
 	hints.ai_family = AF_INET;					/* IPv4 connection */
 	hints.ai_socktype = SOCK_STREAM;			/* TCP, streaming */
-	/* connection with localhost (zero) on port number */
+    /* connection with localhost (zero) on port 2012 (CHANGE IP AND PORT NUM LATER) */
 	r = getaddrinfo(0, port_num, &hints, &server);
 	if (r != 0)
 	{
@@ -63,14 +63,14 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-	/* create the socket */
+    /* CREATE SOCKET */
 	cout << "Assign a socket...";
 	sockfd = socket(
 		server->ai_family,	 /* domain, TCP here */
 		server->ai_socktype, /* type, stream */
 		server->ai_protocol	 /* protocol, IP */
 	);
-	// if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, ))
+
 	if (sockfd == -1)
 	{
 		cout << "failed" << endl;
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-	/* bind - name the socket */
+    /* BIND SOCKET */
 	cout << "Binding socket...";
 	r = bind(sockfd,
 			 server->ai_addr,
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-	/* listen for incoming connections */
+	/* LISTEN */
 	cout << "Listening...";
 	r = listen(sockfd, num_reqs);
 	if (r == -1)
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-	/* accept a new connection */
+	/* ACCEPT */
 	cout << "Accepting new connection ";
 	client_len = sizeof(client_address);
 	clientfd = accept(sockfd,
@@ -113,9 +113,8 @@ int main(int argc, char **argv)
 	}
 	cout << "on file descriptor " << clientfd << endl;
 
-	/* client-server interaction */
+	/* CLIENT-SERVER INTERACTION*/
 	char buff[10000];
-	int n;
 
 	bzero(buff, sizeof(buff));
 	read(clientfd, buff, sizeof(buff));
@@ -125,21 +124,29 @@ int main(int argc, char **argv)
 	picture.write(buff, sizeof(buff));
 	picture.close();
 	
-	getURL("picture.png");
+	string url;
+	
+	url = getURL("picture.png");
+	int url_size = url.length();
+	char url_char[url_size + 1];
+	strcpy(url_char, url.c_str());
 
-	// printf("From client: %s\t To client : ", buff);
 	bzero(buff, sizeof(buff));
 
-	// copy server message in the buffer
-	buff[0] = 'h';
+	for (int i = 0; i < url_size; i++)
+	{
+		buff[i] = url_char[i];
+	}
+	
 	write(clientfd, buff, sizeof(buff));
 
-	/* close the client socket */
+	/* CLOSE SOCKET */
 	close(clientfd);
 
-	/* free allocated memory */
-	freeaddrinfo(server);
-	/* close the socket */
+    /* FREE MEMORY */
+    freeaddrinfo(server);
+
+    /* CLOSE SOCKET */
 	close(sockfd);
 	cout << "Socket closed, done";
 
