@@ -4,5 +4,7 @@ QRServer
 QRClient
 server
 client
+srv
 client.dSYM
 server.dSYM
+srv.dSYM

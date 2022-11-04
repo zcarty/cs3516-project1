@@ -7,7 +7,7 @@
 
 #include "include.h"
 #include "decode.cpp"
-#include <pthread.h>
+
 
 // ./QRServer [option1, ... , optionN]
 //  PORT [port number] (default: 2012)

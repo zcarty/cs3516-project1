@@ -7,5 +7,6 @@
 #include <netdb.h>
 #include <stdexcept>
 #include <fstream>
+#include <pthread.h>
 
 using namespace std;
