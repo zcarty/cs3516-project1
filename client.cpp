@@ -62,7 +62,7 @@ int main()
     fin.seekg(0, ios::end);
     int end = fin.tellg();
     int buff_size = end - begin; // Get file size, which will be max buffer size
-    printf("%d", buff_size);
+    printf("%d\n", buff_size);
 
     char buff[buff_size];
     bzero(buff, sizeof(buff));
@@ -70,7 +70,6 @@ int main()
     fin.read(buff, sizeof(buff)); // Put file contents into buffer
     fin.close();
 
-    cout << "one" << buff [0] << ".";
     /* WRITE DATA TO SERVER */
     write(sockfd, buff, sizeof(buff));
     bzero(buff, buff_size);
