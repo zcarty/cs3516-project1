@@ -94,19 +94,28 @@ int main(int argc, char **argv)
     bzero(buff, buff_size);
 
     /* READ DATA FROM SERVER */
-    printf("From Server:\n");
-
-    // RETURN CODE
-    
 
     // URL SIZE
     unsigned urlsize_buff[1];
-    read(sockfd, urlsize_buff, sizeof(urlsize_buff)); 
-    printf("URL Size: %d\n", urlsize_buff[0]);
+    read(sockfd, urlsize_buff, sizeof(urlsize_buff));
 
     // URL
-    read(sockfd, buff, sizeof(buff)); 
-    printf("URL: %s\n", buff);
+    read(sockfd, buff, sizeof(buff));
+
+    // RETURN CODE
+    printf("From Server:\n");
+    unsigned return_code = 1;
+    if (urlsize_buff[0] == 0)
+    {
+        return_code = 0;
+        printf("Return Code: %d\n", return_code);
+    }
+    else
+    {
+        printf("Return Code: %d\n", return_code);
+        printf("URL Size: %d\n", urlsize_buff[0]);
+        printf("URL: %s\n", buff);
+    }
 
     /* FREE MEMORY */
     freeaddrinfo(server);

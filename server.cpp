@@ -26,11 +26,12 @@ void* concurrency(void* inp) {
     handler* input = (handler*) inp;
     int clientfd = input -> file_descriptor;
 
+	/* client-server interaction */
 	unsigned filesize_buff[1];
 	read(clientfd, filesize_buff, sizeof(filesize_buff));
-	// printf("filesize: %d", filesize_buff[0]);
+	cout << "From Client: " << endl;
+	cout << "File size: " << filesize_buff[0] << " btyes" << endl;
 
-	/* client-server interaction */
 	char buff[filesize_buff[0]];
 	int bytes_read;
 
@@ -40,6 +41,7 @@ void* concurrency(void* inp) {
 	// Image is in buffer now
     char filename[128];
     sprintf(filename, "picture%d.png", (input -> thread_id));
+	cout << "Created " << filename;
 
 	ofstream picture(filename);
 	picture.write(buff, bytes_read);
@@ -47,7 +49,6 @@ void* concurrency(void* inp) {
 	
 	string url = getURL(filename);
 
-	// printf("From client: %s\t To client : ", buff);
 	bzero(buff, sizeof(buff));
 	const char *url_char = url.c_str();
     strcpy(buff, url_char);

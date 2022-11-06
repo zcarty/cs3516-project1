@@ -4,4 +4,17 @@
 *
 * Includes functions that log user activity to admin file
 */
+#include "include.h"
 
+void log(string ip_address, string message) {
+    time_t now = time(0);
+
+    tm *local = localtime(&now);
+    char buff[80];
+
+    strftime(buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", local);
+
+    ofstream adminfile;
+    adminfile.open("admin.txt");
+    adminfile << buff;
+}
