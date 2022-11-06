@@ -8,5 +8,6 @@
 #include <stdexcept>
 #include <fstream>
 #include <pthread.h>
+#include <sstream>
 
 using namespace std;

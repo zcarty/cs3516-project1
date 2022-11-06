@@ -11,19 +11,19 @@ The server will produce the the output from ZXing , including the url represente
 
 
 todo:
--test all command args
-    -port num
-    -rate limiting
-    -concurrent users (done?)
-    -time out
-        -disconnect clients if time out
--rate limiting (by socket)
--admin log
--client should send the server the file size (to designate buffer size)
--server sends back correct message
-    -return code
-    -url length
-    -url
--set image upper bound
--send error messages back to client if file size issues
--readme
+(TODO)-test all command args
+        -port num
+        -rate limiting
+        -concurrent users (done?)
+        -time out
+            -disconnect clients if time out
+(TODO)-rate limiting (by socket)
+(ZEB) -admin log
+(ZEB) -client should send the server the file size (to designate buffer size)
+(ZEB) -server sends back correct message
+        -return code
+        -url length
+        -url
+(TODO)-set image upper bound
+(TODO)-send error messages back to client if file size issues
+(TODO)-readme

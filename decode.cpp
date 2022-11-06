@@ -1,7 +1,13 @@
+/*
+* decode.cpp
+* Zeb Carty & Michael McInerney
+*
+* Functions to retrive url from qr code image
+*/
 #include "include.h"
 
 /* Take command and return terminal output */
-string exec(string command) {
+string get_output(string command) {
    char buff[128];
    string output = "";
 
@@ -25,7 +31,16 @@ string exec(string command) {
 /* From file location of a QR Code, produces url*/
 string getURL(string fileLoc)
 {
-    string command = "java -cp javase.jar:core.jar com.google.zxing.client.j2se.CommandLineRunner " + fileLoc;
+   string command = "java -cp javase.jar:core.jar com.google.zxing.client.j2se.CommandLineRunner " + fileLoc;
     
-    return exec(command);
+   string url = "";
+
+   istringstream iss(get_output(command));
+
+   for(int i = 0; i < 3; i++) // Get third line of output
+   {
+      getline(iss, url);
+   }
+
+   return url;
 }

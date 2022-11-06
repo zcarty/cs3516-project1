@@ -26,15 +26,19 @@ void* concurrency(void* inp) {
     handler* input = (handler*) inp;
     int clientfd = input -> file_descriptor;
 
+	unsigned filesize_buff[1];
+	read(clientfd, filesize_buff, sizeof(filesize_buff));
+	// printf("filesize: %d", filesize_buff[0]);
+
 	/* client-server interaction */
-	char buff[10000];
+	char buff[filesize_buff[0]];
 	int bytes_read;
 
 	bzero(buff, sizeof(buff));
 	bytes_read = read(clientfd, buff, sizeof(buff));
 
 	// Image is in buffer now
-    char filename[100];
+    char filename[128];
     sprintf(filename, "picture%d.png", (input -> thread_id));
 
 	ofstream picture(filename);
@@ -45,10 +49,16 @@ void* concurrency(void* inp) {
 
 	// printf("From client: %s\t To client : ", buff);
 	bzero(buff, sizeof(buff));
-    strcpy(buff, url.c_str());
+	const char *url_char = url.c_str();
+    strcpy(buff, url_char);
+
+	unsigned urlsize_buff[1];
+	urlsize_buff[0] = strlen(url_char);
+	printf("urlsize: %d", urlsize_buff[0]);
 
 	// copy server message in the buffer
-	write(clientfd, buff, sizeof(buff));
+	write(clientfd, urlsize_buff, sizeof(urlsize_buff)); // URL Size
+	write(clientfd, buff, sizeof(buff));				 // URL
 
 	/* close the client socket */
 	close(clientfd);
@@ -59,7 +69,7 @@ void* concurrency(void* inp) {
 
 int main(int argc, char **argv)
 {
-	char *ip_address = "10.63.4.1";
+	const char *ip_address = "10.63.4.1";
 	char *port_num = "2012";
 	int num_reqs = 3;
 	int req_secs = 60;

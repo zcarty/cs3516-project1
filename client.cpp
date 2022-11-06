@@ -14,18 +14,18 @@ int main(int argc, char **argv)
     int r, sockfd;
 
     for (int i = 0; i < argc; i++)
-	{
-		if (strcmp(argv[i], "PORT") == 0)
-		{
-			if(2000 > atoi(argv[i]) || atoi(argv[i]) > 3000)
-			{
-				printf("Please designate a port between 2000 - 3000. Default port (2012) used.");
-			}
-			else
-			{
-				port_num = argv[i + 1];
-			}
-		}
+    {
+        if (strcmp(argv[i], "PORT") == 0)
+        {
+            if (2000 > atoi(argv[i]) || atoi(argv[i]) > 3000)
+            {
+                printf("Please designate a port between 2000 - 3000. Default port (2012) used.");
+            }
+            else
+            {
+                port_num = argv[i + 1];
+            }
+        }
     }
 
     /* CONFIGURE */
@@ -78,8 +78,9 @@ int main(int argc, char **argv)
     int begin = fin.tellg();
     fin.seekg(0, ios::end);
     int end = fin.tellg();
-    int buff_size = end - begin; // Get file size, which will be max buffer size
-    printf("%d\n", buff_size);
+
+    unsigned buff_size = end - begin; // Get file size, which will be max buffer size
+    unsigned filesize_buff[1] = {buff_size};
 
     char buff[buff_size];
     bzero(buff, sizeof(buff));
@@ -88,10 +89,24 @@ int main(int argc, char **argv)
     fin.close();
 
     /* WRITE DATA TO SERVER */
-    write(sockfd, buff, sizeof(buff));
+    write(sockfd, filesize_buff, sizeof(filesize_buff)); // File size
+    write(sockfd, buff, sizeof(buff));                   // Image
     bzero(buff, buff_size);
-    read(sockfd, buff, sizeof(buff)); // Read data back from server
-    printf("From Server : %s", buff);
+
+    /* READ DATA FROM SERVER */
+    printf("From Server:\n");
+
+    // RETURN CODE
+    
+
+    // URL SIZE
+    unsigned urlsize_buff[1];
+    read(sockfd, urlsize_buff, sizeof(urlsize_buff)); 
+    printf("URL Size: %d\n", urlsize_buff[0]);
+
+    // URL
+    read(sockfd, buff, sizeof(buff)); 
+    printf("URL: %s\n", buff);
 
     /* FREE MEMORY */
     freeaddrinfo(server);
