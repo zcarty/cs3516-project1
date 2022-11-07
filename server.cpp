@@ -7,6 +7,7 @@
 
 #include "include.h"
 #include "decode.cpp"
+#include "log.cpp"
 
 
 // ./QRServer [option1, ... , optionN]
@@ -41,7 +42,7 @@ void* concurrency(void* inp) {
 	// Image is in buffer now
     char filename[128];
     sprintf(filename, "picture%d.png", (input -> thread_id));
-	cout << "Created " << filename;
+	cout << "Created " << filename << endl;
 
 	ofstream picture(filename);
 	picture.write(buff, bytes_read);
@@ -56,6 +57,7 @@ void* concurrency(void* inp) {
 	unsigned urlsize_buff[1];
 	urlsize_buff[0] = strlen(url_char);
 	printf("urlsize: %d", urlsize_buff[0]);
+	cout << endl;
 
 	// copy server message in the buffer
 	write(clientfd, urlsize_buff, sizeof(urlsize_buff)); // URL Size
@@ -115,7 +117,7 @@ int main(int argc, char **argv)
 
 	struct addrinfo hints, *server;
 	int r, sockfd, clientfd;
-	struct sockaddr client_address;
+	struct sockaddr_in client_address;
 	socklen_t client_len;
 
     // allocate memory for threads and status tracking
@@ -164,6 +166,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	cout << "done" << endl;
+	log(ip_address, "Server Started");
 
 	/* listen for incoming connections */
 	cout << "Listening...";
@@ -175,12 +178,13 @@ int main(int argc, char **argv)
 	}
 	cout << "done" << endl;
 
-    for(;;) {
+	string x;
+    while(true) {
         /* accept a new connection */
-        cout << "Accepting new connection ";
+        cout << "Accepting new connection " << endl;
         client_len = sizeof(client_address);
         clientfd = accept(sockfd,
-                        &client_address,
+                        (struct sockaddr *)&client_address,
                         &client_len);
         if (clientfd == -1)
         {
@@ -188,6 +192,11 @@ int main(int argc, char **argv)
             exit(1);
         }
         cout << "on file descriptor " << clientfd << endl;
+		/* get client ip */
+		string client_ip = inet_ntoa(client_address.sin_addr);
+		log(client_ip, "Client Connected");
+		
+		
         for(int i = 0; i < max_users; i++) {
             if(returned[i] == true) {
                 returned[i] = false;
@@ -197,6 +206,7 @@ int main(int argc, char **argv)
             }
         } if(num_actives >= max_users) { // thread cleanup
             char error[] = "Error: max number of concurrent connections reached";
+			log(client_ip, "Error: max number of concurrent connections reached");
             write(clientfd, error, sizeof(error));
             close(clientfd);
             continue;
@@ -217,7 +227,9 @@ int main(int argc, char **argv)
 
         // create the thread
         pthread_create(&threads[tracker], NULL, concurrency, &handlers[tracker]);
-        
+        log(client_ip, "Client Disconnected");
+
+		// Time out
     }
 
 	/* free allocated memory */
@@ -225,6 +237,7 @@ int main(int argc, char **argv)
 	/* close the socket */
 	close(sockfd);
 	cout << "Socket closed, done";
+	log(ip_address, "Server Closed");
 
 	return 0;
 }

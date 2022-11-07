@@ -15,6 +15,7 @@ void log(string ip_address, string message) {
     strftime(buff, sizeof(buff), "%Y-%m-%d %H:%M:%S", local);
 
     ofstream adminfile;
-    adminfile.open("admin.txt");
-    adminfile << buff;
+    adminfile.open("admin.txt", ios_base::app);
+    adminfile << buff << " " << ip_address << " " << message << endl;
+    adminfile.close();
 }

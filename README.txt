@@ -28,7 +28,7 @@ todo:
         -time out
             -disconnect clients if time out
 (TODO)-rate limiting (by socket)
-(ZEB) -admin log
+(DONE)-admin log
             -server start/end
             -user connected/disconnect
             -qr code decoded/error
@@ -39,4 +39,4 @@ todo:
         -url (DONE)
 (TODO)-set image upper bound
 (TODO)-send error messages back to client if file size issues
-(TODO)-readme
+(ZEB) -readme

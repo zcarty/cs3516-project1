@@ -5,6 +5,7 @@
  * Creates client to interact with server
  */
 #include "include.h"
+#include "log.cpp"
 
 int main(int argc, char **argv)
 {
@@ -116,6 +117,10 @@ int main(int argc, char **argv)
         printf("URL Size: %d\n", urlsize_buff[0]);
         printf("URL: %s\n", buff);
     }
+
+    char returncode_log[64];
+    sprintf(returncode_log, "Server decode with return code: %d", return_code);
+    log(ip_address, returncode_log);
 
     /* FREE MEMORY */
     freeaddrinfo(server);
