@@ -10,7 +10,7 @@
 #include "log.cpp"
 #include <sys/time.h>
 
-int req_secs = 120;
+int req_secs = 60;
 int num_reqs = 3;
 
 // ./QRServer [option1, ... , optionN]
@@ -57,12 +57,12 @@ void* concurrency(void* inp) {
 		requests[(curr_reqs % num_reqs)] = dtime;
 		curr_reqs++;
 
-		unsigned int zero = 0;
+		unsigned int three = 3;
 		if(curr_reqs > num_reqs) {
 			if((requests[(curr_reqs % num_reqs)] - requests[((curr_reqs-1) % num_reqs)]) < req_secs) {
 				cout << "Error: ratelimit has been reached." << endl; // debug line
 				log(client_ip, "Ratelimit has been reached");
-				write(clientfd, &zero, sizeof(unsigned));
+				write(clientfd, &three, sizeof(unsigned));
 				write(clientfd, "Error: ratelimit has been reached.", sizeof("Error: ratelimit has been reached."));
 				continue;
 			}
@@ -103,7 +103,7 @@ void* concurrency(void* inp) {
 
 int main(int argc, char **argv)
 {
-	const char *ip_address = "127.0.0.1";
+	const char *ip_address = "10.63.4.1";
 	char *port_num = "2012";
 	int max_users = 3;
 	int timeout_secs = 80;

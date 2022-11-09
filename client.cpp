@@ -112,12 +112,18 @@ int main(int argc, char **argv)
 
         // RETURN CODE
         printf("From Server:\n");
-        unsigned return_code = 1;
+        unsigned return_code = 0;
         if (urlsize_buff[0] == 0)
         {
-            return_code = 0;
+            return_code = 1;
             printf("Return Code: %d\n", return_code);
             printf("Error: %s\n", buff);
+        }
+        else if (urlsize_buff[0] == 3)
+        {
+            return_code = 3;
+            printf("Return Code: %d", return_code);
+            printf("%s", buff);
         }
         else
         {
@@ -127,7 +133,7 @@ int main(int argc, char **argv)
         }
 
         char returncode_log[64];
-        sprintf(returncode_log, "Server decode with return code: %d", return_code);
+        sprintf(returncode_log, "Server decoded with return code: %d", return_code);
         log(ip_address, returncode_log);
 
         // allow client to make multiple uploads
