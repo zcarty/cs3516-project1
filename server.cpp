@@ -8,7 +8,10 @@
 #include "include.h"
 #include "decode.cpp"
 #include "log.cpp"
+#include <sys/time.h>
 
+int req_secs = 120;
+int num_reqs = 3;
 
 // ./QRServer [option1, ... , optionN]
 //  PORT [port number] (default: 2012)
@@ -21,49 +24,77 @@ bool* returned;
 struct handler {
     int file_descriptor;
     int thread_id;
+	struct sockaddr_in client_address;
 };
 
 void* concurrency(void* inp) {
     handler* input = (handler*) inp;
     int clientfd = input -> file_descriptor;
+	string client_ip = inet_ntoa(input -> client_address.sin_addr);
+
+	double* requests = (double*) malloc(sizeof(double)*num_reqs);
+	int curr_reqs = 0;
 
 	/* client-server interaction */
 	unsigned filesize_buff[1];
-	read(clientfd, filesize_buff, sizeof(filesize_buff));
-	cout << "From Client: " << endl;
-	cout << "File size: " << filesize_buff[0] << " btyes" << endl;
+	while(read(clientfd, filesize_buff, sizeof(filesize_buff)) > 0) {
+		cout << "From Client: " << endl;
+		cout << "File size: " << filesize_buff[0] << " bytes" << endl;
 
-	char buff[filesize_buff[0]];
-	int bytes_read;
+		char buff[filesize_buff[0]];
+		int bytes_read;
 
-	bzero(buff, sizeof(buff));
-	bytes_read = read(clientfd, buff, sizeof(buff));
+		bzero(buff, sizeof(buff));
+		bytes_read = read(clientfd, buff, sizeof(buff));
 
-	// Image is in buffer now
-    char filename[128];
-    sprintf(filename, "picture%d.png", (input -> thread_id));
-	cout << "Created " << filename << endl;
+		// ratelimiting functionality
+		struct timeval t;
+		gettimeofday(&t, NULL);
+		double dtime = t.tv_usec;
+		dtime = dtime/1000000;
+		dtime += t.tv_sec;
 
-	ofstream picture(filename);
-	picture.write(buff, bytes_read);
-	picture.close();
-	
-	string url = getURL(filename);
+		requests[(curr_reqs % num_reqs)] = dtime;
+		curr_reqs++;
 
-	bzero(buff, sizeof(buff));
-	const char *url_char = url.c_str();
-    strcpy(buff, url_char);
+		unsigned int zero = 0;
+		if(curr_reqs > num_reqs) {
+			if((requests[(curr_reqs % num_reqs)] - requests[((curr_reqs-1) % num_reqs)]) < req_secs) {
+				cout << "Error: ratelimit has been reached." << endl; // debug line
+				log(client_ip, "Ratelimit has been reached");
+				write(clientfd, &zero, sizeof(unsigned));
+				write(clientfd, "Error: ratelimit has been reached.", sizeof("Error: ratelimit has been reached."));
+				continue;
+			}
+		} 
 
-	unsigned urlsize_buff[1];
-	urlsize_buff[0] = strlen(url_char);
-	printf("urlsize: %d", urlsize_buff[0]);
-	cout << endl;
+		// Image is in buffer now
+		char filename[128];
+		sprintf(filename, "picture%d.png", (input -> thread_id));
+		cout << "Created " << filename << endl;
 
-	// copy server message in the buffer
-	write(clientfd, urlsize_buff, sizeof(urlsize_buff)); // URL Size
-	write(clientfd, buff, sizeof(buff));				 // URL
+		ofstream picture(filename);
+		picture.write(buff, bytes_read);
+		picture.close();
+		
+		string url = getURL(filename);
+
+		bzero(buff, sizeof(buff));
+		const char *url_char = url.c_str();
+		strcpy(buff, url_char);
+
+		unsigned urlsize_buff[1];
+		urlsize_buff[0] = strlen(url_char);
+		printf("urlsize: %d", urlsize_buff[0]);
+		cout << endl;
+
+		// copy server message in the buffer
+		write(clientfd, urlsize_buff, sizeof(urlsize_buff)); // URL Size
+		write(clientfd, buff, sizeof(buff));				 // URL
+	}
 
 	/* close the client socket */
+	free(requests);
 	close(clientfd);
     
     returned[input -> thread_id] = true;
@@ -72,10 +103,8 @@ void* concurrency(void* inp) {
 
 int main(int argc, char **argv)
 {
-	const char *ip_address = "10.63.4.1";
+	const char *ip_address = "127.0.0.1";
 	char *port_num = "2012";
-	int num_reqs = 3;
-	int req_secs = 60;
 	int max_users = 3;
 	int timeout_secs = 80;
 
@@ -91,7 +120,7 @@ int main(int argc, char **argv)
 	{
 		if (strcmp(argv[i], "PORT") == 0)
 		{
-			if(2000 > atoi(argv[i]) || atoi(argv[i]) > 3000)
+			if(2000 > atoi(argv[i+1]) || atoi(argv[i+1]) > 3000)
 			{
 				printf("Please designate a port between 2000 - 3000. Default port (2012) used.");
 			}
@@ -221,6 +250,7 @@ int main(int argc, char **argv)
         }
 
         // assign new thread to inactive id
+		handlers[tracker].client_address = client_address;
         handlers[tracker].file_descriptor = clientfd;
         handlers[tracker].thread_id = tracker;
         actives[tracker] = true; num_actives++;

@@ -3,3 +3,7 @@ CS3516 Using VM:
 ssh -p <PORT NUM> student@secnet-gateway.cs.wpi.edu
 
 tWbjLz4JTRC9Xx
+
+sudo apt-get install p7zip-full (to simplify file transfer)
+7z l zipfile.zip (list zip contents)
+7z x zipfile.zip (extract zip contents)
