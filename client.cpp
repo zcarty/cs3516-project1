@@ -69,59 +69,69 @@ int main(int argc, char **argv)
     }
     puts("done");
 
-    /* PROMPT USER FOR FILE PATH */
-    printf("Enter the file path: ");
-    string filename;
-    cin >> filename;
-
-    /* OPEN FILE */
-    ifstream fin(filename, ios::in | ios::binary);
-    int begin = fin.tellg();
-    fin.seekg(0, ios::end);
-    int end = fin.tellg();
-
-    unsigned buff_size = end - begin; // Get file size, which will be max buffer size
-    unsigned filesize_buff[1] = {buff_size};
-
-    char buff[buff_size];
-    bzero(buff, sizeof(buff));
-    fin.seekg(0);
-    fin.read(buff, sizeof(buff)); // Put file contents into buffer
-    fin.close();
-
-    /* WRITE DATA TO SERVER */
-    write(sockfd, filesize_buff, sizeof(filesize_buff)); // File size
-    write(sockfd, buff, sizeof(buff));                   // Image
-    bzero(buff, buff_size);
-
-    /* READ DATA FROM SERVER */
-
-    // URL SIZE
-    unsigned urlsize_buff[1];
-    read(sockfd, urlsize_buff, sizeof(urlsize_buff));
-
-    // URL
-    read(sockfd, buff, sizeof(buff));
-
-    // RETURN CODE
-    printf("From Server:\n");
-    unsigned return_code = 1;
-    if (urlsize_buff[0] == 0)
+    int redo = 1;
+    while (redo)
     {
-        return_code = 0;
-        printf("Return Code: %d\n", return_code);
-    }
-    else
-    {
-        printf("Return Code: %d\n", return_code);
-        printf("URL Size: %d\n", urlsize_buff[0]);
-        printf("URL: %s\n", buff);
-    }
+        /* PROMPT USER FOR FILE PATH */
+        printf("Enter the file path: ");
+        string filename;
+        cin >> filename;
 
-    char returncode_log[64];
-    sprintf(returncode_log, "Server decode with return code: %d", return_code);
-    log(ip_address, returncode_log);
+        /* OPEN FILE */
+        ifstream fin(filename, ios::in | ios::binary);
+        int begin = fin.tellg();
+        fin.seekg(0, ios::end);
+        int end = fin.tellg();
 
+        unsigned buff_size = end - begin; // Get file size, which will be max buffer size
+        unsigned filesize_buff[1] = {buff_size};
+        if (filesize_buff[0] > 4e6)
+        {
+            cout << "Return Code: 1\n Please designate a file under 4 MB" << endl;
+            redo = 1;
+            continue;
+        }
+
+        char buff[buff_size];
+        bzero(buff, sizeof(buff));
+        fin.seekg(0);
+        fin.read(buff, sizeof(buff)); // Put file contents into buffer
+        fin.close();
+
+        /* WRITE DATA TO SERVER */
+        write(sockfd, filesize_buff, sizeof(filesize_buff)); // File size
+        write(sockfd, buff, sizeof(buff));                   // Image
+        bzero(buff, buff_size);
+
+        /* READ DATA FROM SERVER */
+
+        // URL SIZE
+        unsigned urlsize_buff[1];
+        read(sockfd, urlsize_buff, sizeof(urlsize_buff));
+
+        // URL
+        read(sockfd, buff, sizeof(buff));
+
+        // RETURN CODE
+        printf("From Server:\n");
+        unsigned return_code = 1;
+        if (urlsize_buff[0] == 0)
+        {
+            return_code = 0;
+            printf("Return Code: %d\n", return_code);
+        }
+        else
+        {
+            printf("Return Code: %d\n", return_code);
+            printf("URL Size: %d\n", urlsize_buff[0]);
+            printf("URL: %s\n", buff);
+        }
+
+        char returncode_log[64];
+        sprintf(returncode_log, "Server decode with return code: %d", return_code);
+        log(ip_address, returncode_log);
+        redo = 0;
+    }
     /* FREE MEMORY */
     freeaddrinfo(server);
 

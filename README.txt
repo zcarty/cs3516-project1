@@ -37,6 +37,6 @@ todo:
         -return code (2 and 3 needed)
         -url length (DONE)
         -url (DONE)
-(TODO)-set image upper bound
-(TODO)-send error messages back to client if file size issues
+(DONE)-set image upper bound
+(DONE)-send error messages back to client if file size issues
 (ZEB) -readme
