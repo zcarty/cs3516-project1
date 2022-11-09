@@ -96,6 +96,10 @@ void *concurrency(void *inp)
 		// copy server message in the buffer
 		write(clientfd, urlsize_buff, sizeof(urlsize_buff)); // URL Size
 		write(clientfd, buff, sizeof(buff));				 // URL
+
+		char success_log[64];
+		sprintf(success_log, "Server decoded with url: %s", buff);
+		log(client_ip, success_log);
 	}
 
 	/* close the client socket */
@@ -165,7 +169,7 @@ int main(int argc, char **argv)
 	memset(&hints, 0, sizeof(struct addrinfo)); /* use memset_s() */
 	hints.ai_family = AF_INET;					/* IPv4 connection */
 	hints.ai_socktype = SOCK_STREAM;			/* TCP, streaming */
-    /* connection with CS3516_team4_host1 on port_num */
+												/* connection with CS3516_team4_host1 on port_num */
 	r = getaddrinfo(ip_address, port_num, &hints, &server);
 	if (r != 0)
 	{
@@ -215,7 +219,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	cout << "done" << endl;
-
 
 	/* TIMEOUT */
 	fd_set readfds;
