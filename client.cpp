@@ -8,7 +8,7 @@
 
 int main(int argc, char **argv)
 {
-    char *ip_address = "10.63.4.1";
+    char *ip_address = "127.0.0.1";
     char *port_num = "2012";
     struct addrinfo hints, *server;
     int r, sockfd;
@@ -118,10 +118,17 @@ int main(int argc, char **argv)
             printf("Return Code: %d\n", return_code);
             printf("Error: %s\n", buff);
         }
+        else if (urlsize_buff[0] == 2)
+        {
+            return_code = 2;
+            printf("Return Code: %d\n", return_code);
+            printf("%s", buff);
+            break;
+        }
         else if (urlsize_buff[0] == 3)
         {
             return_code = 3;
-            printf("Return Code: %d", return_code);
+            printf("Return Code: %d\n", return_code);
             printf("%s", buff);
         }
         else
