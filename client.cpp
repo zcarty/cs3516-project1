@@ -97,23 +97,9 @@ int main(int argc, char **argv)
         fin.read(buff, sizeof(buff)); // Put file contents into buffer
         fin.close();
 
-        /* BIND SOCKET */
-        printf("Connecting socket...");
-        r = connect(sockfd,
-                    server->ai_addr,
-                    server->ai_addrlen);
-        if (r == -1)
-        {
-            perror("failed");
-            cout << "Return Code: 2" << endl;
-            cout << "Server Timed Out" << endl;
-            break;
-        }
-        puts("done");
-
         /* WRITE DATA TO SERVER */
-        write(sockfd, filesize_buff, sizeof(filesize_buff)); // File size
-        write(sockfd, buff, sizeof(buff));                   // Image
+        send(sockfd, filesize_buff, sizeof(filesize_buff), MSG_NOSIGNAL); // File size
+        send(sockfd, buff, sizeof(buff), MSG_NOSIGNAL);                   // Image
         bzero(buff, buff_size);
 
         /* READ DATA FROM SERVER */
@@ -138,14 +124,14 @@ int main(int argc, char **argv)
         {
             return_code = 2;
             printf("Return Code: %d\n", return_code);
-            printf("%s", buff);
+            printf("Error: Time Out\n");
             break;
         }
         else if (urlsize_buff[0] == 3)
         {
             return_code = 3;
             printf("Return Code: %d\n", return_code);
-            printf("Too many requests");
+            printf("Error: Too many requests\n");
         }
         else
         {
@@ -159,10 +145,14 @@ int main(int argc, char **argv)
         string option;
         cin >> option;
 
-        if (option == "Y" || option == "y")
+        if (option == "Y" || option == "y"){
             finished = false;
-        else
+        }
+        else {
+            unsigned filesize_buff[1] = {1};
+            send(sockfd, filesize_buff, sizeof(filesize_buff), MSG_NOSIGNAL); 
             finished = true;
+        }
     }
     /* FREE MEMORY */
     freeaddrinfo(server);

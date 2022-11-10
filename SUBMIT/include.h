@@ -12,5 +12,6 @@
 #include <pthread.h>
 #include <sstream>
 #include <ctime>
+#include <csignal>
 
 using namespace std;

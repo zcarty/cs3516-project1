@@ -66,7 +66,10 @@ void *concurrency(void *inp)
 		if (r > 0)
 		{
 			read(clientfd, filesize_buff, sizeof(filesize_buff));
-
+			if (filesize_buff[0] == 1)
+			{
+				break;
+			}
 			cout << "From Client: " << endl;
 			cout << "File size: " << filesize_buff[0] << " bytes" << endl;
 
@@ -93,8 +96,8 @@ void *concurrency(void *inp)
 				{
 					cout << "Error: ratelimit has been reached." << endl; // debug line
 					log(client_ip, "Ratelimit has been reached");
-					write(clientfd, &three, sizeof(unsigned));
-					write(clientfd, "Error: ratelimit has been reached.\n", sizeof("Error: ratelimit has been reached.\n"));
+					send(clientfd, &three, sizeof(unsigned), MSG_NOSIGNAL);
+					send(clientfd, "Error: ratelimit has been reached.\n", sizeof("Error: ratelimit has been reached.\n"), MSG_NOSIGNAL);
 					continue;
 				}
 			}
@@ -120,8 +123,8 @@ void *concurrency(void *inp)
 			cout << endl;
 
 			// copy server message in the buffer
-			write(clientfd, urlsize_buff, sizeof(urlsize_buff)); // URL Size
-			write(clientfd, buff, sizeof(buff));				 // URL
+			send(clientfd, urlsize_buff, sizeof(urlsize_buff), MSG_NOSIGNAL); // URL Size
+			send(clientfd, buff, sizeof(buff), MSG_NOSIGNAL);				  // URL
 
 			char success_log[64];
 			sprintf(success_log, "Server decoded with url: %s", buff);

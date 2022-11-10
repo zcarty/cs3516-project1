@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     {
         if (strcmp(argv[i], "PORT") == 0)
         {
-            if (2000 > atoi(argv[i+1]) || atoi(argv[i+1]) > 3000)
+            if (2000 > atoi(argv[i + 1]) || atoi(argv[i + 1]) > 3000)
             {
                 printf("Please designate a port between 2000 - 3000. Default port (2012) used.");
             }
@@ -69,7 +69,8 @@ int main(int argc, char **argv)
     puts("done");
 
     bool finished = false;
-    while(finished == false) {
+    while (finished == false)
+    {
         /* PROMPT USER FOR FILE PATH */
         printf("Enter the file path: ");
         string filename;
@@ -84,7 +85,8 @@ int main(int argc, char **argv)
         unsigned buff_size = end - begin; // Get file size, which will be max buffer size
         unsigned filesize_buff[1] = {buff_size};
 
-        if(filesize_buff[0] > 4e6) {
+        if (filesize_buff[0] > 4e6)
+        {
             cout << "Return Code: 1\n Please designate a file under 4MB" << endl;
             continue;
         }
@@ -94,6 +96,20 @@ int main(int argc, char **argv)
         fin.seekg(0);
         fin.read(buff, sizeof(buff)); // Put file contents into buffer
         fin.close();
+
+        /* BIND SOCKET */
+        printf("Connecting socket...");
+        r = connect(sockfd,
+                    server->ai_addr,
+                    server->ai_addrlen);
+        if (r == -1)
+        {
+            perror("failed");
+            cout << "Return Code: 2" << endl;
+            cout << "Server Timed Out" << endl;
+            break;
+        }
+        puts("done");
 
         /* WRITE DATA TO SERVER */
         write(sockfd, filesize_buff, sizeof(filesize_buff)); // File size
@@ -118,11 +134,18 @@ int main(int argc, char **argv)
             printf("Return Code: %d\n", return_code);
             printf("Error: %s\n", buff);
         }
+        else if (urlsize_buff[0] == 2)
+        {
+            return_code = 2;
+            printf("Return Code: %d\n", return_code);
+            printf("%s", buff);
+            break;
+        }
         else if (urlsize_buff[0] == 3)
         {
             return_code = 3;
-            printf("Return Code: %d", return_code);
-            printf("%s", buff);
+            printf("Return Code: %d\n", return_code);
+            printf("Too many requests");
         }
         else
         {
@@ -136,8 +159,10 @@ int main(int argc, char **argv)
         string option;
         cin >> option;
 
-        if(option == "Y" || option == "y") finished = false;
-        else finished = true;
+        if (option == "Y" || option == "y")
+            finished = false;
+        else
+            finished = true;
     }
     /* FREE MEMORY */
     freeaddrinfo(server);

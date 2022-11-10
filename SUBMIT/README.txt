@@ -12,6 +12,23 @@ run './QRClient <args>'
 QRClient will prompt the user for a filepath (user must submit a image file of a QR Code)
 If decoded without failure, the server will produce a return code, including the url represented by that QR Code
 
+
+Notes:
+Files required on CS3516_team4_host1:
+    server.cpp
+    core.jar
+    javase.jar
+    log.cpp
+    decode.cpp
+    include.h
+    makefile
+Files on another vm:
+    client.cpp
+    include.h
+    makefile
+    <image of qr code>
+
+
 Command Line Arguments:
 (server/client) • PORT [port number]
 (server only)   • RATE [number requests] [number seconds]
