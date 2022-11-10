@@ -11,7 +11,7 @@
 #include <sys/time.h>
 using namespace std;
 
-int timeout_secs = 15;
+int timeout_secs = 80;
 int req_secs = 60;
 int num_reqs = 3;
 
@@ -49,21 +49,22 @@ void *concurrency(void *inp)
 	struct timeval tv;
 	tv.tv_sec = timeout_secs;
 	tv.tv_usec = 0;
- 
+
 	while (true)
 	{
 		/* Sets fds to zero */
 		FD_ZERO(&readfds);
 		FD_ZERO(&writefds);
 		FD_SET(clientfd, &readfds);
-		//FD_SET(clientfd, &writefds);
-		
+		// FD_SET(clientfd, &writefds);
+
 		/* select will only accept a connection if a client connects before timeout */
 		int r = select(FD_SETSIZE, &readfds, &writefds, NULL, &tv);
 		cout << "select returned" << endl;
 		cout << r << endl;
-		
-		if(r > 0) {
+
+		if (r > 0)
+		{
 			read(clientfd, filesize_buff, sizeof(filesize_buff));
 
 			cout << "From Client: " << endl;
@@ -125,7 +126,9 @@ void *concurrency(void *inp)
 			char success_log[64];
 			sprintf(success_log, "Server decoded with url: %s", buff);
 			log(client_ip, success_log);
-		} else {
+		}
+		else
+		{
 			cout << "Time out" << endl;
 			log(client_ip, "Time out");
 			unsigned int two = 2;
@@ -145,8 +148,8 @@ void *concurrency(void *inp)
 
 int main(int argc, char **argv)
 {
-	//const char *ip_address = "10.63.4.1";
-	const char *ip_address = "127.0.0.1";
+	const char *ip_address = "10.63.4.1";
+	// const char *ip_address = "127.0.0.1";
 	char *port_num = "2012";
 	int max_users = 3;
 
@@ -203,30 +206,19 @@ int main(int argc, char **argv)
 	hints.ai_family = AF_INET;					/* IPv4 connection */
 	hints.ai_socktype = SOCK_STREAM;			/* TCP, streaming */
 												/* connection with CS3516_team4_host1 on port_num */
-	// r = getaddrinfo(ip_address, port_num, &hints, &server);
-// 	if (r != 0)
-// 	{
-// 		cout << "failed" << endl;
-// 		exit(1);
-// 	}
-// 	cout << "done" << endl;
 
 	/* create the socket */
 	cout << "Assign a socket...";
-	// sockfd = socket(
-// 		server->ai_family,	 /* domain, TCP here */
-// 		server->ai_socktype, /* type, stream */
-// 		server->ai_protocol	 /* protocol, IP */
-// 	);
-    struct sockaddr_in address;
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons( atoi(port_num) );
+
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = INADDR_ANY;
+	address.sin_port = htons(atoi(port_num));
 
 	sockfd = socket(
 		AF_INET,	 /* domain, TCP here */
 		SOCK_STREAM, /* type, stream */
-		0	 /* protocol, IP */
+		0			 /* protocol, IP */
 	);
 
 	if (sockfd == -1)
@@ -240,19 +232,12 @@ int main(int argc, char **argv)
 	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
 		perror("setsockopt(SO_REUSEADDR) failed");
 
-	// struct timeval timeout;
-	// timeout.tv_sec = timeout_secs;
-	// timeout.tv_usec = 0;
-	//setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-
 	/* bind - name the socket */
 	cout << "Binding socket...";
-	// r = bind(sockfd,
-// 			 server->ai_addr,
-// 			 server->ai_addrlen);
-    r = bind(sockfd,
-			 (struct sockaddr*)&address,
-             sizeof(address));
+
+	r = bind(sockfd,
+			 (struct sockaddr *)&address,
+			 sizeof(address));
 	if (r == -1)
 	{
 		cout << "failed" << endl;
@@ -277,8 +262,8 @@ int main(int argc, char **argv)
 		cout << "Accepting new connection " << endl;
 		client_len = sizeof(client_address);
 		clientfd = accept(sockfd,
-							(struct sockaddr *)&client_address,
-							&client_len);
+						  (struct sockaddr *)&client_address,
+						  &client_len);
 		if (clientfd == -1)
 		{
 			cout << "failed" << endl;
@@ -331,7 +316,7 @@ int main(int argc, char **argv)
 	}
 
 	/* free allocated memory */
-// 	freeaddrinfo(server);
+	freeaddrinfo(server);
 	/* close the socket */
 	close(sockfd);
 	cout << "Socket closed, done" << endl;
